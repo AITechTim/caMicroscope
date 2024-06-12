@@ -1047,6 +1047,211 @@ function setDrawOption() {
   $CAMIC.viewer.canvasDrawInstance.style.color = drawOptionRecord.color || '#7cfc00';
 }
 
+// ---------------- START INSERT FROM labeling.js ---------------- //
+function downloadPresetLabel() {
+  
+  // create json object
+  const data = {
+    slideId: $D.params.data['_id']['$oid'],
+    name: $D.params.data['name'],
+    location: $D.params.data['location'],
+    patches: [],
+  };
+  let rois = $CAMIC.viewer.omanager.overlays;
+  for(let i=0; i<rois.length; i++){
+    let patches = rois[i].data.geometries.features[0];
+    let patchSize = patches.properties.size;
+    let patchStyle = patches.properties.style;
+    let patchCoordinates = patches.geometry.coordinates[0];
+    // $CAMIC.viewer.viewport.getZoom() is the "physical(?)" zoom level
+    //  $CAMIC.viewer.imagingHelper._zoomFactor is normalized to [0,1] 
+    let zoomFactor = $CAMIC.viewer.imagingHelper._zoomFactor
+    console.log(patchSize);
+    console.log(patchCoordinates);
+    // data.patches = $CAMIC.viewer.pmanager.exportPatchesAsJSON('image');
+    data.patches = data.patches.concat(patchCoordinates.map((p, idx)=>{
+      return {
+        note: `ROI ${i}`,
+        size: {
+          x: p[0],
+          y: p[1],
+          width: patchSize[0],
+          height: patchSize[1],
+        },
+        widthInClient: Math.round(patchSize[0] * zoomFactor)
+      };
+    }));
+    //   data.patches = [
+    //     {
+    //         "note": "", 
+    //         "color": "#7cfc00", <- remove
+    //         "isPoint": false, <- remove
+    //         "size": {
+    //             "x": 12696,
+    //             "y": 6998,
+    //             "width": 101,
+    //             "height": 93
+    //         },
+    //         "widthInClient": 79 
+    //     }
+    // ]
+  }
+  console.log(data.patches);
+  getPatchsZip(data);
+  // let text =`{"slideId":"${$D.params.data['_id']['$oid']}",
+  // "name":"${$D.params.data['name']}",
+  // "patches":${JSON.stringify($CAMIC.viewer.pmanager.exportPatchesAsJSON())}}`;
+  // var element = document.createElement('a');
+  // element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  // element.setAttribute('download', `${$D.params.data['name']}-Patches-${new Date().toISOString()}.json`);
+  // element.style.display = 'none';
+  // document.body.appendChild(element);
+  // element.click();
+  // document.body.removeChild(element);
+}
+// patch.status
+// 0 - loading image
+// 1 - loaded
+// 2 - error
+function getPatchsZip(data) {
+  const zip = new JSZip();
+  const imgFolder = zip.folder('images');
+  empty($UI.modalbox.body);
+  createPatchList(data.patches);
+  $UI.modalbox.open();
+  // return;
+  data.patches.forEach((p, index)=>{
+    // create something
+
+    // get image from iip
+    if (!p.isPoint) {
+      getImage({
+        zip: zip,
+        images: imgFolder,
+        data: data,
+        patch: p,
+      }, getImageCallback);
+    }
+  });
+
+  function check(patches) {
+    const p = patches.filter((p)=>{
+      return !p.isPoint;
+    }).find((p)=>{
+      return (!p.error)&&(!p.location);
+    });
+    if (p) return false;
+    return true;
+  }
+
+  var checkImageIsReady = setInterval(function() {
+    if (check(data.patches)) {
+      clearInterval(checkImageIsReady);
+      $UI.modalbox.body.innerHTML+=`<div style='color:#365f9c;font-size:20px'> Compressing...</div>`;
+      data.patches.forEach((p)=> {
+        delete p.label;
+        delete p.widthInClient;
+      });
+      const metaContent = [['name', 'location'], [data.name, data.location]];
+      const patchCols = ['id', 'note', 'x', 'y', 'width', 'height', 'location'];
+      const patchesContent = [patchCols];
+
+      data.patches.forEach((p, idx)=>{
+        patchesContent.push([idx,
+          p['note'],
+          p['size']['x'],
+          p['size']['y'],
+          p['size']['width'],
+          p['size']['height'],
+          p['location']]);
+      });
+
+      zip.file(`metadata.csv`, metaContent.map((r)=>r.join(',')).join('\n'));
+      zip.file(`patches.csv`, patchesContent.map((r)=>r.join(',')).join('\n'));
+
+      zip.generateAsync({type: 'blob'})
+          .then(function(content) {
+            // see FileSaver.js
+            saveAs(content, `${data.name}-Patches-${new Date().toISOString()}.zip`);
+            $UI.modalbox.close();
+          });
+    }
+  }, 500);
+}
+
+function redirect(url, text = '', sec = 5) {
+  let timer = sec;
+  if (!timer) {
+    window.location.href = url;
+  }
+  setInterval(function() {
+    if (!timer) {
+      window.location.href = url;
+    }
+    if (Loading.instance.parentNode) {
+      Loading.text.textContent = `${text} ${timer}s.`;
+    } else {
+      Loading.open(document.body, `${text} ${timer}s.`);
+    }
+    // Hint Message for clients that page is going to redirect to Flex table in 5s
+    timer--;
+  }, 1000);
+}
+function getImage(result, callback) {
+  const data = result.data;
+  const size = result.patch.size;
+  const widthInClient = result.patch.widthInClient*OpenSeadragon.pixelDensityRatio;
+  const url = ImgloaderMode == 'iip'?
+  `../../img/IIP/raw/?IIIF=${data.location}/${size.x},${size.y},${size.width},${size.height}/${widthInClient},/0/default.jpg` :
+  `${data.location}/${size.x},${size.y},${size.width},${size.height}/${widthInClient},/0/default.jpg`;
+  fetch(url).then(function(response) {
+    if (response.ok) {
+      return response.blob();
+    }
+    // error
+    const errorTxt = 'Detch Network response was not ok.';
+    result.patch.label.textContent = errorTxt;
+    result.patch.error = errorTxt;
+    console.error(errorTxt, error.message);
+
+    throw new Error('Detch Network response was not ok.');
+  }).then(function(blob) {
+    if (callback) callback(result, blob);
+  }).catch(function(error) {
+    const errorTxt = 'There has been a problem with your fetch slide';
+    result.patch.label.textContent = errorTxt;
+    result.patch.error = errorTxt;
+    console.error(errorTxt, error.message);
+  });
+}
+
+function getImageCallback(result, blob) {
+  const index = result.data.patches.findIndex((p)=>{
+    return p==result.patch;
+  });
+  result.images.file(`${index}.jpg`, blob);
+  result.patch.location = `./images/${index}.jpg`;
+  result.patch.label.textContent = 'Finished';
+}
+function createPatchList(patches) {
+  const list = document.createElement('div');
+
+  patches.forEach((p, i)=>{
+    const label = p.isPoint?'Finished':'Loading...';
+    const type = p.isPoint?'(Point)':'(Rectangle)';
+    const pdiv = document.createElement('div');
+    pdiv.style.display='flex';
+    pdiv.style.padding='1px';
+    pdiv.innerHTML =`<div style="background-color:${p.color};width:22px;height:22px;border:2px #365f9c solid;"></div>
+    <div style="padding:5px;background-color:#365f9c;font-size:14px;">Patch #${i}${type}</div>
+    <div style="padding:5px;background-color:#365f9c;font-size:14px;">${label}</div>`;
+    p.label = pdiv.querySelectorAll('div')[2];
+    list.appendChild(pdiv);
+  });
+  $UI.modalbox.body.appendChild(list);
+}
+// ---------------- END INSERT FROM labeling.js ---------------- //
+
 function toggleDownloadSelection(data) {
   // const canvasDraw = $CAMIC.viewer.canvasDrawInstance;
 
@@ -1055,6 +1260,7 @@ function toggleDownloadSelection(data) {
   // } else {
   //   downloadSelectionOff();
   // }
+  debugger;
   if (!$CAMIC.viewer.canvasDrawInstance) {
     console.warn('No Draw Tool');
     return;

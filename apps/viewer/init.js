@@ -263,7 +263,6 @@ function initCore() {
             attributes.X = states.x;
             attributes.Y = states.y;
             attributes.zoom = states.z;
-
             body = convertHumanAnnotationToPopupBody(attributes);
             if (
               data.geometries &&
@@ -442,13 +441,13 @@ async function initUIcomponents() {
     });
   }
   // pen
-  subToolsOpt.push({
-    name: 'annotation',
-    icon: 'create', // material icons' name
-    title: 'Draw',
-    type: 'multistates',
-    callback: draw,
-  });
+  // subToolsOpt.push({
+  //   name: 'annotation',
+  //   icon: 'create', // material icons' name
+  //   title: 'Draw',
+  //   type: 'multistates',
+  //   callback: draw,
+  // });
 
   subToolsOpt.push({
     name: 'preset_label',
@@ -508,46 +507,55 @@ async function initUIcomponents() {
     });
   }
   // donwload selection
-  subToolsOpt.push({
-    name: 'download_selection',
-    icon: 'get_app', // material icons' name
-    title: 'Download Selection',
-    type: 'check',
-    value: 'download',
-    callback: toggleDownloadSelection,
-  });
+  // subToolsOpt.push({
+  //   name: 'download_selection',
+  //   icon: 'get_app', // material icons' name
+  //   title: 'Download Selection',
+  //   type: 'check',
+  //   value: 'download',
+  //   callback: toggleDownloadSelection,
+  // });
+  // donwload label
+    subToolsOpt.push({
+      name: 'download_label',
+      icon: 'get_app', // material icons' name
+      title: 'Download Label',
+      type: 'btn',
+      value: 'download',
+      callback: downloadPresetLabel,
+    });
   // enhance
-  subToolsOpt.push({
-    name: 'Enhance',
-    icon: 'invert_colors',
-    title: 'Enhance',
-    type: 'dropdown',
-    value: 'Enhance',
-    dropdownList: [
-      {
-        value: 'Histogram Eq',
-        title: 'Histogram Equalization',
-        icon: 'leaderboard',
-        checked: true,
-      },
-      {
-        value: 'Edge',
-        title: 'Edge',
-        icon: 'show_chart',
-      },
-      {
-        value: 'Sharpen',
-        title: 'Sharpen',
-        icon: 'change_history',
-      },
-      {
-        value: 'Custom',
-        title: 'Custom',
-        icon: 'api',
-      },
-    ],
-    callback: enhance,
-  });
+  // subToolsOpt.push({
+  //   name: 'Enhance',
+  //   icon: 'invert_colors',
+  //   title: 'Enhance',
+  //   type: 'dropdown',
+  //   value: 'Enhance',
+  //   dropdownList: [
+  //     {
+  //       value: 'Histogram Eq',
+  //       title: 'Histogram Equalization',
+  //       icon: 'leaderboard',
+  //       checked: true,
+  //     },
+  //     {
+  //       value: 'Edge',
+  //       title: 'Edge',
+  //       icon: 'show_chart',
+  //     },
+  //     {
+  //       value: 'Sharpen',
+  //       title: 'Sharpen',
+  //       icon: 'change_history',
+  //     },
+  //     {
+  //       value: 'Custom',
+  //       title: 'Custom',
+  //       icon: 'api',
+  //     },
+  //   ],
+  //   callback: enhance,
+  // });
   // share
   if (ImgloaderMode == 'iip') {
     subToolsOpt.push({
@@ -569,53 +577,53 @@ async function initUIcomponents() {
     callback: toggleViewerMode,
   });
   // heatmap
-  subToolsOpt.push({
-    name: 'heatmap',
-    icon: 'satellite',
-    title: 'Heat Map',
-    value: 'heatmap',
-    type: 'btn',
-    callback: openHeatmap,
-  });
-  subToolsOpt.push({
-    name: 'labeling',
-    icon: 'label',
-    title: 'Labeling',
-    value: 'labeling',
-    type: 'btn',
-    callback: function() {
-      window.location.href = `../labeling/labeling.html${window.location.search}`;
-    },
-  });
-  subToolsOpt.push({
-    name: 'segment',
-    icon: 'timeline',
-    type: 'btn',
-    value: 'rect',
-    title: 'Segment',
-    callback: function() {
-      if (window.location.search.length > 0) {
-        window.location.href =
-          '../segment/segment.html' + window.location.search;
-      } else {
-        window.location.href = '../segment/segment.html';
-      }
-    },
-  });
-  subToolsOpt.push({
-    name: 'model',
-    icon: 'aspect_ratio',
-    type: 'btn',
-    value: 'rect',
-    title: 'Predict',
-    callback: function() {
-      if (window.location.search.length > 0) {
-        window.location.href = '../model/model.html' + window.location.search;
-      } else {
-        window.location.href = '../model/model.html';
-      }
-    },
-  });
+  // subToolsOpt.push({
+  //   name: 'heatmap',
+  //   icon: 'satellite',
+  //   title: 'Heat Map',
+  //   value: 'heatmap',
+  //   type: 'btn',
+  //   callback: openHeatmap,
+  // });
+  // subToolsOpt.push({
+  //   name: 'labeling',
+  //   icon: 'label',
+  //   title: 'Labeling',
+  //   value: 'labeling',
+  //   type: 'btn',
+  //   callback: function() {
+  //     window.location.href = `../labeling/labeling.html${window.location.search}`;
+  //   },
+  // });
+  // subToolsOpt.push({
+  //   name: 'segment',
+  //   icon: 'timeline',
+  //   type: 'btn',
+  //   value: 'rect',
+  //   title: 'Segment',
+  //   callback: function() {
+  //     if (window.location.search.length > 0) {
+  //       window.location.href =
+  //         '../segment/segment.html' + window.location.search;
+  //     } else {
+  //       window.location.href = '../segment/segment.html';
+  //     }
+  //   },
+  // });
+  // subToolsOpt.push({
+  //   name: 'model',
+  //   icon: 'aspect_ratio',
+  //   type: 'btn',
+  //   value: 'rect',
+  //   title: 'Predict',
+  //   callback: function() {
+  //     if (window.location.search.length > 0) {
+  //       window.location.href = '../model/model.html' + window.location.search;
+  //     } else {
+  //       window.location.href = '../model/model.html';
+  //     }
+  //   },
+  // });
 
   // -- For Nano borb Start -- //
   if (ImgloaderMode == 'imgbox') {
@@ -641,14 +649,14 @@ async function initUIcomponents() {
 
   // -- view btn START -- //
   if (!($D.params.data.hasOwnProperty('review') && $D.params.data['review']=='true')) {
-    subToolsOpt.push({
-      name: 'review',
-      icon: 'playlist_add_check',
-      title: 'has reviewed',
-      type: 'btn',
-      value: 'review',
-      callback: updateSlideView,
-    });
+    // subToolsOpt.push({
+    //   name: 'review',
+    //   icon: 'playlist_add_check',
+    //   title: 'has reviewed',
+    //   type: 'btn',
+    //   value: 'review',
+    //   callback: updateSlideView,
+    // });
   }
   // screenshot
   subToolsOpt.push({
@@ -708,6 +716,7 @@ async function initUIcomponents() {
     /* opts that need to think of*/
     id: 'ca_tools',
     zIndex: 601,
+    mainTools: [],
     mainToolsCallback: mainMenuChange,
     subTools: subToolsOpt,
   });
