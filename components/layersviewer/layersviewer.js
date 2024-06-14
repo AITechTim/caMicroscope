@@ -32,10 +32,9 @@ function LayersViewer(options) {
     // id: doc element
     // data: layers dataset
     // categoricalData
+    defaultType: ['human', 'ruler', 'segmentation', 'heatmap'],
     isSortableView: false,
   };
-  this.defaultType = ['human', 'ruler', 'segmentation', 'heatmap'];
-
   /**
    * @property {Object} _v_model
    *        View Model for the layers manager
@@ -56,6 +55,8 @@ function LayersViewer(options) {
 
   // setting dataset
   extend(this.setting, options);
+
+  // Use settings
   this.elt = document.getElementById(this.setting.id);
   if (!this.elt) {
     console.error(`${this.className}: No Main Elements...`);
@@ -63,31 +64,40 @@ function LayersViewer(options) {
   }
   this.elt.classList.add('layer_viewer');
 
-  // sort data
+      // sort data
   // this.setting.data.sort(LayersViewer.compare);
   // give index
   // convert og data to categorical data
-  this.setting.categoricalData = {
-    heatmap: {
-      item: {id: 'heatmap', name: 'heatmap'},
+  let categoricalData = {};
+  for (let type of this.setting.defaultType) {
+    categoricalData[type] = {
+      item: {id: type, name: type},
       items: [],
-    },
-    segmentation: {
-      item: {id: 'segmentation', name: 'segmentation'},
-      items: [],
-    },
-    ruler: {
-      item: {id: 'ruler', name: 'ruler'},
-      items: [],
-    },
-    human: {
-      item: {id: 'human', name: 'human'},
-      items: [],
-    },
+    };
   };
+  this.setting.categoricalData = categoricalData;
+
   // this.__covertData();
   this.__initUI();
 }
+
+LayersViewer.prototype.toggleType = function(
+  type,
+  isShow = false,
+  fresh = true,
+) {
+  if (!this.setting.defaultType.includes(type)) {
+    console.warn('Error Type !!!');
+    return;
+  }
+  Object.entries(this.setting.categoricalData[type].items).forEach(([key, label]) => {
+    Object.entries(label.items).forEach(([k, item]) => {
+      this.setting.categoricalData[type].items[key].items[k].isShow = isShow
+    });
+  });
+  console.log("Toggled Type: ", type)
+  // if (fresh) this.update();
+};
 
 LayersViewer.prototype.toggleAllItems = function(
     isShow = false,
@@ -103,7 +113,7 @@ LayersViewer.prototype.addHumanItem = function(
     parent,
     isShow = true,
 ) {
-  if (!this.defaultType.includes(type)) {
+  if (!this.setting.defaultType.includes(type)) {
     console.warn('Error Type !!!');
     return;
   }
@@ -188,7 +198,7 @@ LayersViewer.prototype.addItem = function(
     isShow = true,
     fresh = true,
 ) {
-  if (!this.defaultType.includes(type)) {
+  if (!this.setting.defaultType.includes(type)) {
     console.warn('Error Type !!!');
     return;
   }
@@ -216,7 +226,7 @@ LayersViewer.prototype.removeItemById = function(
     parent,
     fresh = true,
 ) {
-  if (!this.defaultType.includes(type)) {
+  if (!this.setting.defaultType.includes(type)) {
     console.warn('Error Type !!!');
     return;
   }
@@ -249,7 +259,7 @@ LayersViewer.prototype.removeItemById = function(
 };
 
 LayersViewer.prototype.getDataItemById = function(id, type, parent) {
-  if (!this.defaultType.includes(type)) {
+  if (!this.setting.defaultType.includes(type)) {
     console.warn('Error Type !!!');
     return;
   }

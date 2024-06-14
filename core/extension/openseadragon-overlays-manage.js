@@ -664,10 +664,10 @@
          * drawOnDisplay draw marks on display canvas
          * @param  {Canvas} ctx  a canvas' 2d context that the marks draw on
          */
-        drawOnDisplay:function(ctx){
+        drawOnDisplay:function(ctx, data){
             for (var i = 0; i < this.overlays.length; i++) {
                 const layer = this.overlays[i];
-                if(layer.isShow) layer.onDraw(ctx);
+                if(layer.isShow) layer.onDraw(ctx, data);
             }
         },
 

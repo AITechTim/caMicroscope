@@ -126,8 +126,8 @@ LabelsViewer.prototype.__refreshUI = function() {
 
   // edit and remove label
   this.allLabels.forEach((elt)=>{
-    elt.querySelector('.material-icons.edit').addEventListener('click', this.__editLabelsHandler.bind(this));
-    elt.querySelector('.material-icons.remove').addEventListener('click', this.__removeLabelsHandler.bind(this));
+    // elt.querySelector('.material-icons.edit').addEventListener('click', this.__editLabelsHandler.bind(this));
+    // elt.querySelector('.material-icons.remove').addEventListener('click', this.__removeLabelsHandler.bind(this));
   }, this);
 
   // -- create editor -- //
@@ -286,6 +286,9 @@ LabelsViewer.prototype.setLabels = function(elt, labels) {
   this.__editLabelElt.setAttribute('data-type', labels.type);
   this.__editLabelElt.setAttribute('data-color', labels.color);
   this.__editLabelElt.setAttribute('data-mode', labels.mode);
+  this.__editLabelElt.setAttribute('data-line-width', labels.lineWidth);
+  this.__editLabelElt.setAttribute('data-stroke-style', labels.strokeStyle);
+  this.__editLabelElt.setAttribute('data-fill-style', labels.fillStyle);
 
   if (labels.mode == 'grid') {
     this.__editLabelElt.setAttribute('data-size', labels.size);
@@ -350,17 +353,17 @@ LabelsViewer.prototype.__createLables = function(data) {
     return `<div class='empty'>No Labels, Please Add One.</div>`;
   }
 };
-LabelsViewer.prototype.__createLabelsCard = function({id, type, color, mode, size, key}) {
+LabelsViewer.prototype.__createLabelsCard = function({id, type, color, mode, size, key, fillStyle, strokeStyle, lineWidth}) {
   return `
-    <div class="labels" data-id="${id}" data-type="${type}" ${key?`data-key=${key}`:''} data-color="${color}" data-mode="${mode}" ${size?`data-size="${size}"`:''} >
+    <div class="labels" data-id="${id}" data-type="${type}" ${key?`data-key=${key}`:''} data-color="${color}" data-mode="${mode}" data-stroke-style="${strokeStyle}" data-fill-style="${fillStyle}" data-line-width="${lineWidth}" ${size?`data-size="${size}"`:''} >
         <div style="font-size:3px;border-radius:2px;border:1px #808080 solid;color:${color};background:${color}">${color}</div>
         <div class="labels-title">${type}</div>
         <div class="labels-description">
             ${this.__getLabelText({mode, size})}
             ${key?`<br>Ctrl + ${key}`:''}
         </div>
-        <div class="material-icons edit" title="Edit">short_text</div>
-        <div class="material-icons remove" title="Delete">clear</div>
+        <!-- <div class="material-icons edit" title="Edit">short_text</div> -->
+        <!-- <div class="material-icons remove" title="Delete">clear</div> -->
     </div>`;
 };
 LabelsViewer.prototype.__getLabelText = function({mode, size}) {
@@ -476,10 +479,10 @@ LabelsViewer.prototype.__addAllEventsForLabels = function(labels) {
     const elt = e.currentTarget;
     this.selectLabel(elt);
   });
-  const _remove = labels.querySelector('.material-icons.remove');
-  _remove.addEventListener('click', this.__removeLabelsHandler.bind(this));
-  const _edit = labels.querySelector('.material-icons.edit');
-  _edit.addEventListener('click', this.__editLabelsHandler.bind(this));
+  // const _remove = labels.querySelector('.material-icons.remove');
+  // _remove.addEventListener('click', this.__removeLabelsHandler.bind(this));
+  // const _edit = labels.querySelector('.material-icons.edit');
+  // _edit.addEventListener('click', this.__editLabelsHandler.bind(this));
 };
 
 

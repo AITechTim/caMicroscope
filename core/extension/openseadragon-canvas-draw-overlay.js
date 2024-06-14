@@ -104,6 +104,15 @@
     ) {
       this.style.isFill = false;
     }
+    if (options.style && options.style.strokeStyle) {
+      this.style.strokeStyle = options.style.strokeStyle;
+    }
+    if (options.style && options.style.fillStyle) {
+      this.style.fillStyle = options.style.fillStyle;
+    }
+    if (options.style && options.style.lineWidth) {
+      this.style.lineWidth = options.style.lineWidth;
+    }
     this.events = {};
     // global events list for easily remove and add
     this._event = {
@@ -1141,6 +1150,9 @@
         this._current_path_.properties.style.lineJoin = this.style.lineJoin;
         this._current_path_.properties.style.lineCap = this.style.lineCap;
         this._current_path_.properties.style.isFill = this.style.isFill;
+        this._current_path_.properties.style.strokeStyle = this.style.strokeStyle;
+        this._current_path_.properties.style.fillStyle = this.style.fillStyle;
+        this._current_path_.properties.style.lineWidth = this.style.lineWidth;
       } catch (error) {}
       let points = this._current_path_.geometry.coordinates[0];
       /* Modifications */

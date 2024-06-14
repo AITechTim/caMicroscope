@@ -229,6 +229,9 @@ function initCore() {
         let warning = null;
         switch (type) {
           case 'human':
+            // if(data?.properties?.annotations?.id === 'bg-grid-saVKMASaASfsa3qwf46') {
+            //   return;
+            // }
             let area;
             let circumference;
             if (data.geometries) {
@@ -524,6 +527,15 @@ async function initUIcomponents() {
       value: 'download',
       callback: downloadPresetLabel,
     });
+    // donwload label
+    // subToolsOpt.push({
+    //   name: 'add_grid',
+    //   icon: 'add', // material icons' name
+    //   title: 'Add grid',
+    //   type: 'btn',
+    //   value: 'add',
+    //   callback: createInitialGridAsAnnotation,
+    // });
   // enhance
   // subToolsOpt.push({
   //   name: 'Enhance',
@@ -716,7 +728,12 @@ async function initUIcomponents() {
     /* opts that need to think of*/
     id: 'ca_tools',
     zIndex: 601,
-    mainTools: [],
+    mainTools: [{
+      icon: 'view_list',
+      title: 'Layers',
+      type: 'check',
+      value: 'layers',
+    }],
     mainToolsCallback: mainMenuChange,
     subTools: subToolsOpt,
   });
@@ -1310,11 +1327,11 @@ function createLayerViewer(id, viewerData, callback, rootCallback) {
   const layersViewer = new LayersViewer({
     id: id,
     data: viewerData,
+    defaultType: ['human', 'ruler'],
     removeCallback: removeCallback,
     locationCallback: locationCallback,
     callback: callback,
     rootCallback: rootCallback,
-
   });
   layersViewer.elt.parentNode.removeChild(layersViewer.elt);
   return layersViewer;
@@ -1438,7 +1455,6 @@ function addHumanLayerItems() {
   }, mainViewerItems);
 
   $UI.layersViewer.addHumanItems(mainViewerItems);
-
   // minor viewer minorViewer
   const minorViewerItems = {
     'other': {
@@ -1476,8 +1492,13 @@ function addHumanLayerItems() {
     }
     return items;
   }, minorViewerItems);
-
   $UI.layersViewerMinor.addHumanItems(minorViewerItems);
+  // $UI.layersViewer.toggleType('human', true);
+
+  let roiLabelCheckbox = document.querySelector("input[data-id='_o5dji6zt2']");
+  if (roiLabelCheckbox !== null) {
+    roiLabelCheckbox.click();
+  }
 }
 function openLoadStatus(text) {
   const txt = $UI.loadStatus.querySelector('.text');
@@ -1507,8 +1528,8 @@ function addComputerLayerItems(data) {
   const minorViewerData = $D.computerlayers.map((d) => {
     return {item: d, isShow: false};
   });
-  $UI.layersViewer.addItems(mainViewerData, 'segmentation');
-  $UI.layersViewerMinor.addItems(minorViewerData, 'segmentation');
+  // $UI.layersViewer.addItems(mainViewerData, 'segmentation');
+  // $UI.layersViewerMinor.addItems(minorViewerData, 'segmentation');
 }
 
 function addHeatmapLayerItems(data) {
@@ -1519,8 +1540,8 @@ function addHeatmapLayerItems(data) {
   const minorViewerData = $D.heatmaplayers.map((d) => {
     return {item: d, isShow: false};
   });
-  $UI.layersViewer.addItems(mainViewerData, 'heatmap');
-  $UI.layersViewerMinor.addItems(minorViewerData, 'heatmap');
+  // $UI.layersViewer.addItems(mainViewerData, 'heatmap');
+  // $UI.layersViewerMinor.addItems(minorViewerData, 'heatmap');
 }
 
 // const mainViewerData = $D.overlayers.map((d) => {

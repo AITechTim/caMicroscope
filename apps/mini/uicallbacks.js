@@ -1854,6 +1854,275 @@ function presetLabelOff() {
   }
 }
 
+// {
+//   "type": "FeatureCollection",
+//   "features": [
+//       {
+//           "type": "Feature",
+//           "properties": {
+//               "style": {
+//                   "color": "#919191",
+//                   "lineJoin": "round",
+//                   "lineCap": "round",
+//                   "isFill": true
+//               },
+//               "size": [
+//                   0.007957918526830123,
+//                   0.01618227717004337
+//               ]
+//           },
+//           "geometry": {
+//               "type": "LineString",
+//               "coordinates": [
+//                   [
+//                       [
+//                           0.1432425334829422,
+//                           0.48546831510130106
+//                       ],
+//                       [
+//                           0.1432425334829422,
+//                           0.5016505922713445
+//                       ],
+//                       [
+//                           0.15120045200977233,
+//                           0.5016505922713445
+//                       ],
+//                       [
+//                           0.15120045200977233,
+//                           0.5178328694413878
+//                       ],
+//                       [
+//                           0.15915837053660245,
+//                           0.5178328694413878
+//                       ],
+//                       [
+//                           0.15915837053660245,
+//                           0.5340151466114311
+//                       ],
+//                       [
+//                           0.15120045200977233,
+//                           0.5340151466114311
+//                       ],
+//                       [
+//                           0.1432425334829422,
+//                           0.5178328694413878
+//                       ],
+//                       [
+//                           0.1432425334829422,
+//                           0.5340151466114311
+//                       ],
+//                       [
+//                           0.15120045200977233,
+//                           0.5501974237814745
+//                       ],
+//                       [
+//                           0.1432425334829422,
+//                           0.5501974237814745
+//                       ],
+//                       [
+//                           0.15120045200977233,
+//                           0.5663797009515179
+//                       ],
+//                       [
+//                           0.15915837053660245,
+//                           0.5663797009515179
+//                       ],
+//                       [
+//                           0.16711628906343257,
+//                           0.5663797009515179
+//                       ],
+//                       [
+//                           0.16711628906343257,
+//                           0.5501974237814745
+//                       ],
+//                       [
+//                           0.16711628906343257,
+//                           0.5340151466114311
+//                       ],
+//                       [
+//                           0.16711628906343257,
+//                           0.5178328694413878
+//                       ]
+//                   ]
+//               ]
+//           },
+//           "bound": {
+//               "type": "Polygon",
+//               "coordinates": [
+//                   [
+//                       [
+//                           0.1432425334829422,
+//                           0.48546831510130106
+//                       ],
+//                       [
+//                           0.16711628906343257,
+//                           0.48546831510130106
+//                       ],
+//                       [
+//                           0.16711628906343257,
+//                           0.5663797009515179
+//                       ],
+//                       [
+//                           0.1432425334829422,
+//                           0.5663797009515179
+//                       ],
+//                       [
+//                           0.1432425334829422,
+//                           0.48546831510130106
+//                       ]
+//                   ]
+//               ]
+//           }
+//       }
+//   ]
+// }
+
+function drawInitialGrid() {
+  let ctx = $CAMIC.viewer.omanager._display_ctx_;
+  caDrawHelper.drawGrid(ctx);
+}
+
+function createInitialGridAsAnnotation() {
+  const execId = "bg-grid-saVKMASaASfsa3qwf46";
+  const labelId = "bg-grid-saVKMASaASfsa3qwf46";
+  const labelName = data.type;
+  // const parent = data.type;
+  const noteData = {
+    id: execId,
+    labelId: labelId,
+    name: "grid",
+    notes: "grid"
+  };
+  const feature = {
+    "type": "Feature",
+    "properties": {
+        "style": {
+            "color": "#919191",
+            "lineJoin": "round",
+            "lineCap": "round",
+            "isFill": true
+        },
+        "size": [
+            1000,
+            1000
+        ]
+    },
+    "geometry": {
+        "type": "LineString",
+        "coordinates": [
+            [
+               [0,0], 
+               [1000,1000], 
+               [2000,2000],
+               [3000,3000],
+               [4000,4000],
+               [5000,5000],
+               [6000,6000],
+            ]
+        ],
+        "path": null
+    },
+    "bound": {
+        "type": "LineString",
+        "coordinates": [[
+              [0,0],[6000,0],[6000,6000],[0,6000]
+            ]]
+    }
+  };
+  let annotJson;
+
+  // brush
+  const values = getGrids(
+      feature.geometry.coordinates[0],
+      feature.properties.size,
+  );
+  const set = new Set();
+  values.map((i) => i.toString()).forEach((v) => set.add(v));
+  const points = Array.from(set).map((d) => d.split(','));
+  annotJson = {
+    creator: getUserId(),
+    created_date: new Date(),
+    provenance: {
+      image: {
+        slide: $D.params.slideId,
+      },
+      analysis: {
+        source: 'human',
+        execution_id: execId, // randomId
+        name: labelName, // labelName
+        labelId: labelId,
+        type: 'label',
+        isGrid: true,
+      },
+    },
+    properties: {
+      annotations: noteData,
+    },
+    geometries: convertGeometries(points, {
+      note: data.type,
+      size: feature.properties.size,
+      color: feature.properties.style.color,
+    }),
+  };
+
+  $CAMIC.store
+      .addMark(annotJson)
+      .then((data) => {
+      // server error
+        if (data.error) {
+          $UI.message.addError(`${data.text}:${data.url}`);
+          Loading.close();
+          return;
+        }
+
+        // no data added
+        if (data.count < 1) {
+          Loading.close();
+          $UI.message.addWarning(`Annotation Save Failed`);
+          return;
+        }
+        const __data = data.ops[0];
+        // create layer data
+        const newItem = {
+          id: execId,
+          name: noteData.name,
+          typeId: 'human',
+          typeName: 'human',
+          creator: getUserId(),
+          shape: annotJson.geometries.features[0].geometry.type,
+          isGrid: annotJson.provenance.analysis.isGrid? true: false,
+          label: {
+            id: annotJson.provenance.analysis.labelId,
+            name: annotJson.provenance.analysis.name,
+          },
+          data: null,
+        };
+        $D.humanlayers.push(newItem);
+        $UI.layersViewer.addHumanItem(newItem, 'human', labelId);
+        $UI.layersViewerMinor.addHumanItem(
+            newItem,
+            'human',
+            labelId,
+            $minorCAMIC && $minorCAMIC.viewer ? true : false,
+        );
+
+        __data._id = {$oid: __data._id};
+        addAnnotation(
+            execId,
+            __data,
+            'human',
+            labelId,
+        );
+      })
+      .catch((e) => {
+        Loading.close();
+        console.log('save failed', e);
+      })
+      .finally(() => {
+        $UI.message.addSmall(`Added The '${noteData.name}' Annotation.`);
+      });
+}
+
 function savePresetLabel() {
   if ($CAMIC.viewer.canvasDrawInstance._path_index === 0) {
     // toast

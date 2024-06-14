@@ -100,6 +100,7 @@ function layersLoader() {
   var checkCoreIsReady = setInterval(function() {
     if ($UI.layersViewer && $UI.layersViewerMinor) {
       clearInterval(checkCoreIsReady);
+      createInitialGridAsAnnotation();
       loadingHumanOverlayers();
       loadingRulerOverlayers();
       loadingHeatmapOverlayers();

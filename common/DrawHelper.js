@@ -300,7 +300,17 @@ caDrawHelper.prototype.drawGrid = function(ctx, polygon){
         const style = polygon.properties.style;
         const size = polygon.properties.size;
         //this.setStyle(ctx, style);
-        ctx.fillStyle = hexToRgbA(polygon.properties.style.color,0.1);
+        if(typeof polygon.properties.style.fillStyle !== 'undefined'){
+            ctx.fillStyle = polygon.properties.style.fillStyle;
+        } else {
+            ctx.fillStyle = hexToRgbA(polygon.properties.style.color, 0.1);
+        }
+        if(typeof polygon.properties.style.strokeStyle !== 'undefined'){
+            ctx.strokeStyle = polygon.properties.style.strokeStyle; 
+        }
+        if(typeof polygon.properties.style.lineWidth !== 'undefined'){
+            ctx.lineWidth = polygon.properties.style.lineWidth; 
+        }
         const points = polygon.geometry.coordinates[0];
         const grids = getGrids(points, size);
         return this.drawMultiGrid(ctx, grids, size);
@@ -348,8 +358,7 @@ caDrawHelper.prototype.clearCanvas = function(canvas){
 }
 
 var DrawHelper = new caDrawHelper();
-//OpenSeadragon.DrawHelper = DrawHelper;
+// OpenSeadragon.DrawHelper = DrawHelper;
 
-
-module.exports = caDrawHelper;
+// module.exports = caDrawHelper;
 
